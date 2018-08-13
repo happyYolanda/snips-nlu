@@ -8,8 +8,7 @@ from pathlib import Path
 
 from future.utils import iteritems
 
-from snips_nlu.builtin_entities import (get_builtin_entity_parser,
-                                        is_builtin_entity)
+from snips_nlu.builtin_entities import is_builtin_entity
 from snips_nlu.constants import (
     BUILTIN_ENTITY_PARSER, DATA, END, ENTITIES, ENTITY, ENTITY_KIND, INTENTS,
     LANGUAGE, RES_MATCH_RANGE, RES_VALUE, SLOT_NAME, START, TEXT, UTTERANCES)
@@ -82,8 +81,7 @@ class DeterministicIntentParser(IntentParser):
         """Fit the intent parser with a valid Snips dataset"""
         logger.info("Fitting deterministic parser...")
         dataset = validate_and_format_dataset(dataset)
-        if self.builtin_entity_parser is None:
-            self.builtin_entity_parser = get_builtin_entity_parser(dataset)
+        self.fit_builtin_entity_parser_if_needed(dataset)
         self.language = dataset[LANGUAGE]
         self.regexes_per_intent = dict()
         self.group_names_to_slot_names = dict()
@@ -420,11 +418,10 @@ def _deduplicate_overlapping_slots(slots, language):
         rhs_tokens = tokenize(rhs_slot[RES_VALUE], language)
         if len(lhs_tokens) > len(rhs_tokens):
             return lhs_slot
-        elif len(lhs_tokens) == len(rhs_tokens) \
+        if len(lhs_tokens) == len(rhs_tokens) \
                 and len(lhs_slot[RES_VALUE]) > len(rhs_slot[RES_VALUE]):
             return lhs_slot
-        else:
-            return rhs_slot
+        return rhs_slot
 
     return deduplicate_overlapping_items(slots, overlap, resolve)
 
@@ -437,8 +434,7 @@ def _deduplicate_overlapping_entities(entities):
     def resolve(lhs_entity, rhs_entity):
         if len(lhs_entity[RES_VALUE]) > len(rhs_entity[RES_VALUE]):
             return lhs_entity
-        else:
-            return rhs_entity
+        return rhs_entity
 
     return deduplicate_overlapping_items(entities, overlap, resolve)
 
