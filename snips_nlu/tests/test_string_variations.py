@@ -1,9 +1,9 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-from snips_nlu.builtin_entities import BuiltinEntityParser
 from snips_nlu.constants import (LANGUAGE_EN, LANGUAGE_FR, RES_MATCH_RANGE,
                                  SNIPS_NUMBER, START)
+from snips_nlu.entity_parser import BuiltinEntityParser
 from snips_nlu.string_variations import (
     alphabetic_value, and_variations, get_string_variations,
     numbers_variations, punctuation_variations)

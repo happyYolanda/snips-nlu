@@ -5,11 +5,11 @@ from builtins import range
 
 from mock import patch
 
-from snips_nlu.builtin_entities import BuiltinEntityParser
 from snips_nlu.constants import (
     DATA, END, ENTITY, LANGUAGE_EN, RES_INTENT, RES_INTENT_NAME,
     RES_SLOTS, SLOT_NAME, START, TEXT)
 from snips_nlu.dataset import validate_and_format_dataset
+from snips_nlu.entity_parser import BuiltinEntityParser
 from snips_nlu.intent_parser.deterministic_intent_parser import (
     DeterministicIntentParser, _deduplicate_overlapping_slots,
     _get_range_shift, _replace_builtin_entities,
@@ -58,6 +58,7 @@ class TestDeterministicIntentParser(FixtureTest):
                 "dummy_entity_1": {
                     "automatically_extensible": False,
                     "use_synonyms": True,
+                    "parser_threshold": 1.0,
                     "data": [
                         {
                             "synonyms": [
@@ -87,6 +88,7 @@ class TestDeterministicIntentParser(FixtureTest):
                 "dummy_entity_2": {
                     "automatically_extensible": False,
                     "use_synonyms": True,
+                    "parser_threshold": 1.0,
                     "data": [
                         {
                             "synonyms": [
@@ -473,6 +475,7 @@ class TestDeterministicIntentParser(FixtureTest):
                 "non_ascìi_entïty": {
                     "use_synonyms": False,
                     "automatically_extensible": True,
+                    "parser_threshold": 1.0,
                     "data": []
                 }
             },

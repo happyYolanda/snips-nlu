@@ -368,9 +368,8 @@ class CRFSlotFiller(SlotFiller):
             model = json.load(f)
 
         slot_filler_config = cls.config_type.from_dict(model["config"])
-        slot_filler = cls(
-            config=slot_filler_config,
-            builtin_entity_parser=shared.get(BUILTIN_ENTITY_PARSER))
+        slot_filler = cls(config=slot_filler_config)
+        slot_filler._set_parsers_from_shared_resources(**shared)
         slot_filler.language = model["language_code"]
         slot_filler.intent = model["intent"]
         slot_filler.slot_name_mapping = model["slot_name_mapping"]

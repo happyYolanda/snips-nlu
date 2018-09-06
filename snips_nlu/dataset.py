@@ -13,7 +13,7 @@ from snips_nlu.entity_parser.builtin_entity_parser import (
 from snips_nlu.constants import (
     AUTOMATICALLY_EXTENSIBLE, CAPITALIZE, DATA, ENTITIES, ENTITY, INTENTS,
     LANGUAGE, SLOT_NAME, SYNONYMS, TEXT, USE_SYNONYMS, UTTERANCES, VALIDATED,
-    VALUE)
+    VALUE, PARSER_THRESHOLD)
 from snips_nlu.preprocessing import tokenize_light
 from snips_nlu.string_variations import get_string_variations
 from snips_nlu.utils import validate_key, validate_keys, validate_type
@@ -132,15 +132,18 @@ def _extract_entity_values(entity):
 def validate_and_format_custom_entity(entity, queries_entities, language,
                                       builtin_entity_parser):
     validate_type(entity, dict)
-    mandatory_keys = [USE_SYNONYMS, AUTOMATICALLY_EXTENSIBLE, DATA]
+    mandatory_keys = [USE_SYNONYMS, AUTOMATICALLY_EXTENSIBLE, DATA,
+                      PARSER_THRESHOLD]
     validate_keys(entity, mandatory_keys, object_label="entity")
     validate_type(entity[USE_SYNONYMS], bool)
     validate_type(entity[AUTOMATICALLY_EXTENSIBLE], bool)
     validate_type(entity[DATA], list)
+    validate_type(entity[PARSER_THRESHOLD], float)
 
     formatted_entity = dict()
     formatted_entity[AUTOMATICALLY_EXTENSIBLE] = entity[
         AUTOMATICALLY_EXTENSIBLE]
+    formatted_entity[PARSER_THRESHOLD] = entity[PARSER_THRESHOLD]
     use_synonyms = entity[USE_SYNONYMS]
 
     # Validate format and filter out unused data

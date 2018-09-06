@@ -26,7 +26,8 @@ class EntityParser(with_metaclass(ABCMeta, object)):
         text = text.lower()
         if not use_cache:
             return self.parser.parse(text, scope)
-        cache_key = (text, tuple(sorted(scope)))
+        scope_key = tuple(sorted(scope)) if scope is not None else scope
+        cache_key = (text, scope_key)
         if cache_key not in self.cache:
             parser_result = self.parser.parse(text, scope)
             self.cache[cache_key] = parser_result

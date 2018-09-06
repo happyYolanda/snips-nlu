@@ -9,7 +9,7 @@ from pathlib import Path
 import six
 from future.utils import with_metaclass
 
-from snips_nlu.builtin_entities import is_builtin_entity
+from snips_nlu.entity_parser.builtin_entity_parser import is_builtin_entity
 from snips_nlu.constants import (AUTOMATICALLY_EXTENSIBLE, DATA, SYNONYMS,
                                  USE_SYNONYMS, VALUE)
 

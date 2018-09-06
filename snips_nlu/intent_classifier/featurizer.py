@@ -148,15 +148,9 @@ class Featurizer(object):
             vocab = {k: int(v) for k, v in
                      iteritems(self.tfidf_vectorizer.vocabulary_)}
             idf_diag = self.tfidf_vectorizer._tfidf._idf_diag.data.tolist()
-            # pylint: enable=W0212
-            entity_utterances_to_entity_names = {
-                k: list(v)
-                for k, v in iteritems(self.entity_utterances_to_feature_names)
-            }
         else:
             vocab = None
             idf_diag = None
-            entity_utterances_to_entity_names = dict()
 
         tfidf_vectorizer = {
             "vocab": vocab,
@@ -167,8 +161,6 @@ class Featurizer(object):
             "language_code": self.language,
             "tfidf_vectorizer": tfidf_vectorizer,
             "best_features": self.best_features,
-            "entity_utterances_to_feature_names":
-                entity_utterances_to_entity_names,
             "config": self.config.to_dict(),
             "unknown_words_replacement_string":
                 self.unknown_words_replacement_string
@@ -184,15 +176,9 @@ class Featurizer(object):
         config = FeaturizerConfig.from_dict(obj_dict["config"])
         tfidf_vectorizer = _deserialize_tfidf_vectorizer(
             obj_dict["tfidf_vectorizer"], language, config.sublinear_tf)
-        entity_utterances_to_entity_names = {
-            k: set(v) for k, v in
-            iteritems(obj_dict["entity_utterances_to_feature_names"])
-        }
         self = cls(
             language=language,
             tfidf_vectorizer=tfidf_vectorizer,
-            entity_utterances_to_feature_names=
-            entity_utterances_to_entity_names,
             best_features=obj_dict["best_features"],
             config=config,
             unknown_words_replacement_string=obj_dict[
@@ -212,13 +198,16 @@ def _preprocess_utterance(utterance, language, builtin_entity_parser,
         utterance_tokens, word_clusters_name, language)
     normalized_stemmed_tokens = [_normalize_stem(t, language, use_stemming)
                                  for t in utterance_tokens]
-    custom_entities = custom_entity_parser.parse(normalized_stemmed_tokens)
+
+    custom_entities = custom_entity_parser.parse(
+        " ".join(normalized_stemmed_tokens))
     custom_entities = [e for e in custom_entities
-                       if e["raw_value"] != unknownword_replacement_string]
-    entities_features = [_entity_name_to_feature(e["entity"], language)
-                         for e in custom_entities]
-    builtin_entities = builtin_entity_parser.parse(utterance_text,
-                                                   use_cache=True)
+                       if e["value"] != unknownword_replacement_string]
+    entities_features = [
+        _entity_name_to_feature(e["entity_identifier"], language)
+        for e in custom_entities]
+    builtin_entities = builtin_entity_parser.parse(
+        utterance_text, use_cache=True)
     builtin_entities_features = [
         _builtin_entity_to_feature(ent[ENTITY_KIND], language)
         for ent in builtin_entities

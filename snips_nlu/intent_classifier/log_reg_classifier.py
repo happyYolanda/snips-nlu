@@ -219,6 +219,7 @@ class LogRegIntentClassifier(IntentClassifier):
         if featurizer is not None:
             intent_classifier.featurizer = Featurizer.from_dict(
                 featurizer, **shared)
+        intent_classifier._set_parsers_from_shared_resources(**shared)
         return intent_classifier
 
     def to_dict(self):

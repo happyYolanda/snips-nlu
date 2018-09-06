@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 from builtins import str
+
 from mock import mock
 
 from snips_nlu.constants import (
-    AUTOMATICALLY_EXTENSIBLE, CAPITALIZE, ENTITIES, SNIPS_DATETIME, UTTERANCES)
+    ENTITIES, SNIPS_DATETIME)
 from snips_nlu.dataset import validate_and_format_dataset
 from snips_nlu.tests.utils import SnipsTest
 
@@ -125,7 +126,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": True,
-                    "automatically_extensible": False
+                    "automatically_extensible": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -142,7 +144,8 @@ class TestDataset(SnipsTest):
                         "Entity 2": "Entity_1",
                     },
                     "automatically_extensible": False,
-                    "capitalize": False
+                    "capitalize": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -205,7 +208,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": True,
-                    "automatically_extensible": False
+                    "automatically_extensible": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -253,7 +257,8 @@ class TestDataset(SnipsTest):
                         "Alternative Entity 1": "alternative entity 1",
                     },
                     "automatically_extensible": False,
-                    "capitalize": False
+                    "capitalize": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -316,7 +321,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": False,
-                    "automatically_extensible": False
+                    "automatically_extensible": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -361,7 +367,8 @@ class TestDataset(SnipsTest):
                             "entity 1": "entity 1",
                         },
                     "automatically_extensible": False,
-                    "capitalize": False
+                    "capitalize": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -459,7 +466,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": False,
-                    "automatically_extensible": False
+                    "automatically_extensible": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -504,7 +512,8 @@ class TestDataset(SnipsTest):
                             "Entity 1": "entity 1",
                         },
                     "capitalize": False,
-                    "automatically_extensible": False
+                    "automatically_extensible": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -577,12 +586,14 @@ class TestDataset(SnipsTest):
                 "entity1": {
                     "data": [],
                     "use_synonyms": False,
-                    "automatically_extensible": True
+                    "automatically_extensible": True,
+                    "parser_threshold": 1.0
                 },
                 "entity2": {
                     "data": [],
                     "use_synonyms": False,
-                    "automatically_extensible": True
+                    "automatically_extensible": True,
+                    "parser_threshold": 1.0
                 },
                 "entity3": {
                     "data": [
@@ -592,7 +603,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": False,
-                    "automatically_extensible": True
+                    "automatically_extensible": True,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -654,7 +666,8 @@ class TestDataset(SnipsTest):
                             "Entity1": "entity1",
                         },
                     "automatically_extensible": True,
-                    "capitalize": True
+                    "capitalize": True,
+                    "parser_threshold": 1.0
                 },
                 "entity2": {
                     "utterances": {
@@ -664,7 +677,8 @@ class TestDataset(SnipsTest):
                         "Myentity2": "myentity2"
                     },
                     "automatically_extensible": True,
-                    "capitalize": True
+                    "capitalize": True,
+                    "parser_threshold": 1.0
                 },
                 "entity3": {
                     "utterances":
@@ -674,7 +688,8 @@ class TestDataset(SnipsTest):
                             "M_Entity3": "m_entity3"
                         },
                     "automatically_extensible": True,
-                    "capitalize": False
+                    "capitalize": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -717,7 +732,8 @@ class TestDataset(SnipsTest):
                 "entity1": {
                     "data": [],
                     "use_synonyms": True,
-                    "automatically_extensible": True
+                    "automatically_extensible": True,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -747,7 +763,8 @@ class TestDataset(SnipsTest):
                         "ëNtity": "ëNtity"
                     },
                     "automatically_extensible": True,
-                    "capitalize": False
+                    "capitalize": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -781,7 +798,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": True,
-                    "automatically_extensible": True
+                    "automatically_extensible": True,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",
@@ -792,14 +810,15 @@ class TestDataset(SnipsTest):
 
         expected_entities = {
             "entity1": {
-                AUTOMATICALLY_EXTENSIBLE: True,
-                UTTERANCES: {
+                "automatically_extensible": True,
+                "utterances": {
                     "Ëntity 1": "Ëntity 1",
                     "ëntity 1": "Ëntity 1",
                     "entity 2": "Ëntity 1",
                     "Entity 2": "Ëntity 1",
                 },
-                CAPITALIZE: False
+                "capitalize": False,
+                "parser_threshold": 1.0
             }
         }
 
@@ -841,7 +860,8 @@ class TestDataset(SnipsTest):
                         }
                     ],
                     "use_synonyms": True,
-                    "automatically_extensible": False
+                    "automatically_extensible": False,
+                    "parser_threshold": 1.0
                 }
             },
             "language": "en",

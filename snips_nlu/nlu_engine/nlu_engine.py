@@ -8,26 +8,24 @@ from copy import deepcopy
 from pathlib import Path
 
 from future.utils import iteritems
-from snips_nlu.tokenization import normalize
 
 from snips_nlu.__about__ import __model_version__, __version__
 from snips_nlu.constants import (
     BUILTIN_ENTITY_PARSER, CAPITALIZE, ENTITIES, GAZETTEER_ENTITIES, LANGUAGE,
     RES_ENTITY, RES_INTENT, RES_SLOTS, CUSTOM_ENTITY_PARSER, RES_VALUE,
     ENTITY_KIND, RES_MATCH_RANGE, ENTITY, VALUE, AUTOMATICALLY_EXTENSIBLE,
-    UTTERANCES, DATA)
+    UTTERANCES)
 from snips_nlu.dataset import validate_and_format_dataset
 from snips_nlu.default_configs import DEFAULT_CONFIGS
-from snips_nlu.nlu_engine.utils import resolve_slots
-from snips_nlu.entity_parser.builtin_entity_parser import is_builtin_entity
+from snips_nlu.entity_parser.builtin_entity_parser import (
+    is_builtin_entity, BuiltinEntityParser)
 from snips_nlu.pipeline.configs import NLUEngineConfig
 from snips_nlu.pipeline.processing_unit import (
-    MLUnit, build_ml_unit, load_processing_unit)
-from snips_nlu.resources import (
-    get_builtin_entity_parser_from_dir, load_resources_from_dir,
-    persist_resources)
-from snips_nlu.result import empty_result, is_empty, parsing_result, \
-    builtin_slot, custom_slot
+    load_processing_unit)
+from snips_nlu.pipeline.ml_unit import MLUnit, build_ml_unit
+from snips_nlu.resources import persist_resources
+from snips_nlu.result import (
+    empty_result, is_empty, parsing_result, builtin_slot, custom_slot)
 from snips_nlu.utils import (
     check_persisted_path, fitted_required, get_slot_name_mappings, json_string,
     log_elapsed_time, log_result)
@@ -86,14 +84,14 @@ class SnipsNLUEngine(MLUnit):
         """
         logger.info("Fitting NLU engine...")
 
-        self.fit_builtin_entity_parser_if_needed(dataset)
-        self.fit_custom_entity_parser_if_needed(dataset)
         dataset = validate_and_format_dataset(dataset)
         self._dataset_metadata = _get_dataset_metadata(dataset)
-
         if self.config is None:
             language = self._dataset_metadata["language_code"]
             self.config = self.config_type.from_dict(DEFAULT_CONFIGS[language])
+
+        self.fit_builtin_entity_parser_if_needed(dataset)
+        self.fit_custom_entity_parser_if_needed(dataset)
 
         parsers = []
         for parser_config in self.config.intent_parsers_configs:
@@ -151,8 +149,7 @@ class SnipsNLUEngine(MLUnit):
             slots = res[RES_SLOTS]
             scope = [s[RES_ENTITY] for s in slots
                      if is_builtin_entity(s[RES_ENTITY])]
-            resolved_slots = resolve_slots(
-                text, slots, entities, self.builtin_entity_parser, scope)
+            resolved_slots = self.resolve_slots(text, slots,  scope)
             return parsing_result(text, intent=res[RES_INTENT],
                                   slots=resolved_slots)
         return empty_result(text)
@@ -233,22 +230,29 @@ class SnipsNLUEngine(MLUnit):
         if self.config is not None:
             config = self.config.to_dict()
 
-        custom_entities_parser_path = None
-        if self.custom_entity_parser is not None:
-            custom_entities_parser_path = \
-                directory_path / "custom_intent_parser"
-            self.custom_entity_parser.persist(custom_entities_parser_path)
+        builtin_entity_parser = None
+        if self.builtin_entity_parser is not None:
+            builtin_entity_parser = "builtin_intent_parser"
+            builtin_entity_parser_path = directory_path / builtin_entity_parser
+            self.builtin_entity_parser.persit(builtin_entity_parser_path)
 
+        custom_entity_parser = None
+        if self.custom_entity_parser is not None:
+            custom_entity_parser = "custom_intent_parser"
+            custom_entity_parser_path = directory_path / custom_entity_parser
+            self.custom_entity_parser.persist(custom_entity_parser_path)
 
         model = {
             "unit_name": self.unit_name,
             "dataset_metadata": self._dataset_metadata,
             "intent_parsers": intent_parsers,
-            CUSTOM_ENTITY_PARSER: custom_entities_parser_path,
+            "custom_entity_parser": custom_entity_parser,
+            "builtin_entity_parser": builtin_entity_parser,
             "config": config,
             "model_version": __model_version__,
             "training_package_version": __version__
         }
+
         model_json = json_string(model)
         model_path = directory_path / "nlu_engine.json"
         with model_path.open(mode="w") as f:
@@ -287,18 +291,11 @@ class SnipsNLUEngine(MLUnit):
                 "Incompatible data model: persisted object=%s, python lib=%s"
                 % (model_version, __model_version__))
 
-        resources_dir = directory_path / "resources"
-        builtin_entity_parser_path = shared.get(BUILTIN_ENTITY_PARSER)
         builtin_entity_parser = None
-        if builtin_entity_parser_path is None:
-            if resources_dir.is_dir():
-                for subdir in resources_dir.iterdir():
-                    if subdir.is_dir() and (subdir / "metadata.json").exists():
-                        load_resources_from_dir(subdir)
-                        builtin_entity_parser = \
-                            get_builtin_entity_parser_from_dir(subdir)
-                        shared[BUILTIN_ENTITY_PARSER] = builtin_entity_parser
-                        break
+        builtin_entity_parser_path = shared.get(BUILTIN_ENTITY_PARSER)
+        if builtin_entity_parser_path is not None:
+            builtin_entity_parser = BuiltinEntityParser.from_path(
+                builtin_entity_parser_path)
 
         custom_entity_parser = None
         custom_entity_parser_path = shared.get(CUSTOM_ENTITY_PARSER)
@@ -333,6 +330,7 @@ class SnipsNLUEngine(MLUnit):
 
 
 def _get_dataset_metadata(dataset):
+    dataset = deepcopy(dataset)
     entities = dict()
     for entity_name, entity in iteritems(dataset[ENTITIES]):
         if is_builtin_entity(entity_name):

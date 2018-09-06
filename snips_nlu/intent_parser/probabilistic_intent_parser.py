@@ -14,7 +14,8 @@ from snips_nlu.dataset import validate_and_format_dataset
 from snips_nlu.intent_parser.intent_parser import IntentParser
 from snips_nlu.pipeline.configs import ProbabilisticIntentParserConfig
 from snips_nlu.pipeline.processing_unit import (
-    build_ml_unit, load_processing_unit)
+    load_processing_unit)
+from snips_nlu.pipeline.ml_unit import build_ml_unit
 from snips_nlu.result import empty_result, parsing_result
 from snips_nlu.utils import (check_persisted_path, elapsed_since,
                              fitted_required, json_string, log_elapsed_time,
@@ -67,6 +68,8 @@ class ProbabilisticIntentParser(IntentParser):
         """
         logger.info("Fitting probabilistic intent parser...")
         dataset = validate_and_format_dataset(dataset)
+        self.fit_builtin_entity_parser_if_needed(dataset)
+        self.fit_custom_entity_parser_if_needed(dataset)
         intents = list(dataset[INTENTS])
         if self.intent_classifier is None:
             self.intent_classifier = build_ml_unit(
@@ -173,8 +176,8 @@ class ProbabilisticIntentParser(IntentParser):
         with model_path.open(encoding="utf8") as f:
             model = json.load(f)
 
-        parser = cls(config=cls.config_type.from_dict(model["config"]),
-                     builtin_entity_parser=shared.get(BUILTIN_ENTITY_PARSER))
+        parser = cls(config=cls.config_type.from_dict(model["config"]))
+        parser._set_parsers_from_shared_resources(**shared)
         classifier = None
         intent_classifier_path = path / "intent_classifier"
         if intent_classifier_path.exists():

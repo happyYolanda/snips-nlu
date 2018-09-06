@@ -7,10 +7,11 @@ import numpy as np
 from future.utils import itervalues
 from mock import patch
 
-from snips_nlu.builtin_entities import BuiltinEntityParser
+
 from snips_nlu.constants import (
     INTENTS, LANGUAGE_EN, RES_INTENT_NAME, UTTERANCES)
 from snips_nlu.dataset import validate_and_format_dataset
+from snips_nlu.entity_parser import BuiltinEntityParser
 from snips_nlu.intent_classifier import LogRegIntentClassifier
 from snips_nlu.intent_classifier.featurizer import Featurizer
 from snips_nlu.intent_classifier.log_reg_classifier_utils import (

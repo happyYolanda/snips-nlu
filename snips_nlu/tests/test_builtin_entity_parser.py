@@ -2,13 +2,20 @@
 from __future__ import unicode_literals
 
 from mock import patch
-from snips_nlu_ontology import get_all_languages
+from snips_nlu_ontology import (
+    get_all_languages, get_supported_gazetteer_entities, BuiltinEntityParser as _BuiltinEntityParser)
 
-from snips_nlu.builtin_entities import (
+from snips_nlu.constants import ENTITIES, ENTITY_KIND, LANGUAGE
+from snips_nlu.entity_parser.builtin_entity_parser import (
     BuiltinEntityParser, _BUILTIN_ENTITY_PARSERS, get_builtin_entity_parser,
     get_builtin_entity_parser_from_scope)
-from snips_nlu.constants import ENTITIES, ENTITY_KIND, LANGUAGE
 from snips_nlu.tests.utils import SnipsTest
+
+
+def _get_builtin_parser():
+    language = "en"
+    return get_builtin_entity_parser_from_scope(
+        language, get_supported_gazetteer_entities(language))
 
 
 class TestBuiltinEntityParser(SnipsTest):
@@ -18,7 +25,7 @@ class TestBuiltinEntityParser(SnipsTest):
     def test_should_parse_grammar_entities(self):
         # Given
         text = "we'll be 2 at the meeting"
-        parser = BuiltinEntityParser("en", None)
+        parser = _get_builtin_parser()
 
         # When / Then
         parse = parser.parse(text)
@@ -170,10 +177,9 @@ class TestBuiltinEntityParser(SnipsTest):
         ]
         self.assertListEqual(expected_result, result)
 
-    @patch("snips_nlu.builtin_entities.BuiltinEntityParser")
-    @patch("snips_nlu.builtin_entities.find_gazetteer_entity_data_path")
-    def test_should_share_parser(
-            self, mocked_find_gazetteer_entity_data_path, mocked_parser):
+    @patch("snips_nlu.entity_parser.builtin_entity_parser"
+           ".BuiltinEntityParser")
+    def test_should_share_parser(self, mocked_parser):
         # Given
         dataset1 = {
             LANGUAGE: "fr",
@@ -200,13 +206,6 @@ class TestBuiltinEntityParser(SnipsTest):
                 "snips/musicArtist": {},
             }
         }
-
-        # pylint: disable=unused-argument
-        def mock_find_gazetteer_entity_data_path(language, entity_name):
-            return "mocked_path"
-
-        mocked_find_gazetteer_entity_data_path.side_effect = \
-            mock_find_gazetteer_entity_data_path
 
         # When
         get_builtin_entity_parser(dataset1)
