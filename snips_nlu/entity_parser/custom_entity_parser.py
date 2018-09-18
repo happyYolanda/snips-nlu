@@ -23,6 +23,9 @@ class CustomEntityParser(EntityParser):
 
     @classmethod
     def build(cls, dataset, parser_usage):
+        from snips_nlu.dataset import validate_and_format_dataset
+        
+        dataset = validate_and_format_dataset(dataset)
         language = dataset[LANGUAGE]
         custom_entities = {
             entity_name: deepcopy(entity)

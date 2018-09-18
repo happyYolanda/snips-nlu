@@ -29,8 +29,8 @@ from snips_nlu.slot_filler.features_utils import get_all_ngrams
 class Featurizer(object):
     def __init__(self, language, unknown_words_replacement_string,
                  config=FeaturizerConfig(), tfidf_vectorizer=None,
-                 best_features=None, entity_utterances_to_feature_names=None,
-                 builtin_entity_parser=None, custom_entity_parser=None):
+                 best_features=None, builtin_entity_parser=None,
+                 custom_entity_parser=None):
         self.config = config
         self.language = language
         if tfidf_vectorizer is None:
@@ -38,9 +38,6 @@ class Featurizer(object):
                 self.language, sublinear_tf=self.config.sublinear_tf)
         self.tfidf_vectorizer = tfidf_vectorizer
         self.best_features = best_features
-        self.entity_utterances_to_feature_names = \
-            entity_utterances_to_feature_names
-
         self.unknown_words_replacement_string = \
             unknown_words_replacement_string
 

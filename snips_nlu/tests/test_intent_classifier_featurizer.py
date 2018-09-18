@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 import json
 
 import numpy as np
-from future.utils import iteritems
 from mock import patch
+from snips_nlu_utils import normalize
 
 from snips_nlu.constants import DATA, ENTITY, LANGUAGE_EN, SLOT_NAME, TEXT
 from snips_nlu.dataset import validate_and_format_dataset
@@ -76,8 +76,7 @@ class TestIntentClassifierFeaturizer(SnipsTest):
             dumped = json_string(serialized_featurizer)
 
         msg = "SnipsNLUEngine should be deserializable from dict with " \
-              "unicode" \
-              " values"
+              "unicode values"
         with self.fail_if_exception(msg):
             _ = Featurizer.from_dict(json.loads(dumped))
 
@@ -87,21 +86,17 @@ class TestIntentClassifierFeaturizer(SnipsTest):
         # pylint: enable=W0212
 
         best_features = featurizer.best_features
-        entity_utterances_to_feature_names = {
-            "entity1": ["entityfeatureentity2"]
-        }
 
         expected_serialized = {
             "config": {
                 "sublinear_tf": False,
                 "pvalue_threshold": pvalue_threshold,
-                "word_clusters_name": "brown_clusters"
+                "word_clusters_name": "brown_clusters",
+                "use_stemming": False
             },
             "language_code": "en",
             "tfidf_vectorizer": {"idf_diag": idf_diag, "vocab": vocabulary},
             "best_features": best_features,
-            "entity_utterances_to_feature_names":
-                entity_utterances_to_feature_names,
             "unknown_words_replacement_string": None
         }
         self.assertDictEqual(expected_serialized, serialized_featurizer)
@@ -120,17 +115,11 @@ class TestIntentClassifierFeaturizer(SnipsTest):
             "use_stemming": False
         }
 
-        entity_utterances_to_feature_names = {
-            "entity_1": ["entityfeatureentity_1"]
-        }
-
         featurizer_dict = {
             "config": config,
             "language_code": language,
             "tfidf_vectorizer": {"idf_diag": idf_diag, "vocab": vocabulary},
             "best_features": best_features,
-            "entity_utterances_to_feature_names":
-                entity_utterances_to_feature_names,
             "unknown_words_replacement_string": None
         }
 
@@ -149,13 +138,6 @@ class TestIntentClassifierFeaturizer(SnipsTest):
         self.assertListEqual(featurizer.best_features, best_features)
         self.assertEqual(config, featurizer.config.to_dict())
 
-        self.assertDictEqual(
-            featurizer.entity_utterances_to_feature_names,
-            {
-                k: set(v) for k, v
-                in iteritems(entity_utterances_to_feature_names)
-            })
-
     @patch("snips_nlu.intent_classifier.featurizer.get_word_cluster")
     @patch("snips_nlu.intent_classifier.featurizer.stem")
     @patch("snips_nlu.entity_parser.custom_entity_parser.stem")
@@ -166,6 +148,7 @@ class TestIntentClassifierFeaturizer(SnipsTest):
         language = LANGUAGE_EN
 
         def _stem(t):
+            t = normalize(t)
             if t == "beautiful":
                 s = "beauty"
             elif t == "birdy":
@@ -264,7 +247,8 @@ class TestIntentClassifierFeaturizer(SnipsTest):
             language,
             None,
             custom_entity_parser=custom_entity_parser,
-            config=FeaturizerConfig(word_clusters_name="brown_clusters")
+            config=FeaturizerConfig(word_clusters_name="brown_clusters",
+                                    use_stemming=True)
         ).fit(dataset, utterances, labels)
 
         # When
@@ -284,34 +268,6 @@ class TestIntentClassifierFeaturizer(SnipsTest):
         ]
 
         self.assertListEqual(utterances, expected_utterances)
-
-    def test_featurizer_should_exclude_replacement_string(self):
-        # Given
-        language = LANGUAGE_EN
-        dataset = {
-            "language": LANGUAGE_EN,
-            "entities": {
-                "dummy1": {
-                    "utterances": {
-                        "unknownword": "unknownword",
-                        "what": "what"
-                    },
-                    "parser_threshold": 1.0
-                }
-            }
-        }
-        replacement_string = "unknownword"
-        featurizer = Featurizer(
-            language, unknown_words_replacement_string=replacement_string,
-            config=FeaturizerConfig())
-        utterances = [text_to_utterance("unknownword")]
-        y = np.array([1])
-
-        # When
-        featurizer.fit(dataset, utterances, y)
-        processed_utterances = featurizer.preprocess_utterances(utterances)
-
-        # Then
 
     def test_featurizer_should_be_serialized_when_not_fitted(self):
         # Given

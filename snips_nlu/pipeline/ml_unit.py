@@ -6,6 +6,8 @@ from snips_nlu.constants import (
     BUILTIN_ENTITY_PARSER, CUSTOM_ENTITY_PARSER, CUSTOM_ENTITY_PARSER_USAGE)
 from snips_nlu.entity_parser.builtin_entity_parser import BuiltinEntityParser
 from snips_nlu.entity_parser.custom_entity_parser import CustomEntityParser
+from snips_nlu.entity_parser.custom_entity_parser_usage import \
+    CustomEntityParserUsage
 from snips_nlu.pipeline.configs import MLUnitConfig
 from snips_nlu.pipeline.processing_unit import SerializableUnit, _get_unit_type
 from snips_nlu.utils import classproperty
@@ -51,16 +53,17 @@ class MLUnit(with_metaclass(ABCMeta, SerializableUnit)):
         return self
 
     def fit_custom_entity_parser_if_needed(self, dataset):
-        # We fit an entity parser only if the unit has already been fitted
-        # on a dataset, in this case we want to refit. We also if the parser
-        # is none.
-        # In the other case the parser is provided fitted by another unit
+        # We only fit a custom entity parser when the unit has already been
+        # fitted or if the parser is none.
+        # In the other cases the parser is provided fitted by another unit.
         required_resources = self.config.get_required_resources()
-        if not required_resources:
-            return self
-        parser_usage = required_resources.get(CUSTOM_ENTITY_PARSER_USAGE)
-        if not parser_usage:
-            return self
+        if not required_resources or not required_resources.get(
+                CUSTOM_ENTITY_PARSER_USAGE):
+            # In these cases we need a custom entity parser only to do the
+            # final slot resolution step, which must be done without stemming.
+            parser_usage = CustomEntityParserUsage.WITHOUT_STEMS
+        else:
+            parser_usage = required_resources[CUSTOM_ENTITY_PARSER_USAGE]
 
         if self.custom_entity_parser is None or self.fitted:
             self.custom_entity_parser = CustomEntityParser.build(

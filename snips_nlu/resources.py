@@ -2,17 +2,14 @@ from __future__ import unicode_literals
 
 import json
 import shutil
-
 from builtins import next
 from pathlib import Path
 
-from snips_nlu_ontology import get_builtin_entity_shortname
-
-from snips_nlu.entity_parser.builtin_entity_parser import (
-    BuiltinEntityParser, find_gazetteer_entity_data_path)
 from snips_nlu.constants import (
-    DATA_PATH, GAZETTEERS, GAZETTEER_ENTITIES, NOISE, RESOURCES_DIR, STEMS,
-    STOP_WORDS, WORD_CLUSTERS, CUSTOM_ENTITY_PARSER_USAGE)
+    CUSTOM_ENTITY_PARSER_USAGE, DATA_PATH, GAZETTEERS, GAZETTEER_ENTITIES,
+    NOISE, RESOURCES_DIR, STEMS, STOP_WORDS, WORD_CLUSTERS)
+from snips_nlu.entity_parser.builtin_entity_parser import (
+    find_gazetteer_entity_data_path)
 from snips_nlu.entity_parser.custom_entity_parser import (
     CustomEntityParserUsage)
 from snips_nlu.utils import get_package_path, is_package, json_string
@@ -89,6 +86,7 @@ def load_resources_from_dir(resources_dir):
         STEMS: stems,
         RESOURCES_DIR: str(resources_dir),
     }
+
 
 def print_compatibility_error(language):
     from snips_nlu.cli.utils import PrettyPrintLevel, pretty_print
