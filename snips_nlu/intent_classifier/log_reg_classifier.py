@@ -9,7 +9,7 @@ import numpy as np
 from future.utils import iteritems
 from sklearn.linear_model import SGDClassifier
 
-from snips_nlu.constants import BUILTIN_ENTITY_PARSER, LANGUAGE
+from snips_nlu.constants import LANGUAGE
 from snips_nlu.dataset import validate_and_format_dataset
 from snips_nlu.intent_classifier.featurizer import Featurizer
 from snips_nlu.intent_classifier.intent_classifier import IntentClassifier
@@ -201,9 +201,7 @@ class LogRegIntentClassifier(IntentClassifier):
         :func:`~LogRegIntentClassifier.to_dict`
         """
         config = LogRegIntentClassifierConfig.from_dict(unit_dict["config"])
-        intent_classifier = cls(
-            config=config,
-            builtin_entity_parser=shared.get(BUILTIN_ENTITY_PARSER))
+        intent_classifier = cls(config=config, **shared)
         sgd_classifier = None
         coeffs = unit_dict['coeffs']
         intercept = unit_dict['intercept']
@@ -219,7 +217,6 @@ class LogRegIntentClassifier(IntentClassifier):
         if featurizer is not None:
             intent_classifier.featurizer = Featurizer.from_dict(
                 featurizer, **shared)
-        intent_classifier._set_parsers_from_shared_resources(**shared)
         return intent_classifier
 
     def to_dict(self):

@@ -5,7 +5,6 @@ from copy import deepcopy
 
 from mock import MagicMock, patch
 
-
 from snips_nlu.constants import LANGUAGE, LANGUAGE_EN, SNIPS_DATETIME, \
     SNIPS_NUMBER
 from snips_nlu.dataset import validate_and_format_dataset
@@ -387,8 +386,8 @@ class TestCRFFeatures(SnipsTest):
         factory = get_feature_factory(config)
         dataset = deepcopy(SAMPLE_DATASET)
         dataset = validate_and_format_dataset(dataset)
-        custom_entity_parser = CustomEntityParser(
-            CustomEntityParserUsage.WITHOUT_STEMS).fit(dataset)
+        custom_entity_parser = CustomEntityParser.build(
+            dataset, CustomEntityParserUsage.WITHOUT_STEMS)
         factory.fit(dataset, "dummy_intent_1")
 
         # When
@@ -448,7 +447,8 @@ class TestCRFFeatures(SnipsTest):
         factory.fit(mocked_dataset, None)
 
         # When
-        features = factory.build_features(BuiltinEntityParser("en", None))
+        features = factory.build_features(
+            BuiltinEntityParser.build(language="en"))
         features = sorted(features, key=lambda f: f.base_name)
         res0 = features[0].compute(0, cache)
         res1 = features[0].compute(1, cache)

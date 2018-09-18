@@ -234,7 +234,7 @@ class TestDeterministicIntentParser(FixtureTest):
         parser.persist(self.tmp_file_path)
         deserialized_parser = DeterministicIntentParser.from_path(
             self.tmp_file_path,
-            builtin_entity_parser=BuiltinEntityParser("en", None))
+            builtin_entity_parser=BuiltinEntityParser.build(language="en"))
         text = "this is a dummy_a query with another dummy_c at 10p.m. or " \
                "at 12p.m."
 
@@ -335,7 +335,7 @@ class TestDeterministicIntentParser(FixtureTest):
         parser.persist(self.tmp_file_path)
         deserialized_parser = DeterministicIntentParser.from_path(
             self.tmp_file_path,
-            builtin_entity_parser=BuiltinEntityParser("en", None))
+            builtin_entity_parser=BuiltinEntityParser.build(language="en"))
 
         texts = [
             (
@@ -408,7 +408,7 @@ class TestDeterministicIntentParser(FixtureTest):
         intent_parser_bytes = intent_parser.to_byte_array()
         loaded_intent_parser = DeterministicIntentParser.from_byte_array(
             intent_parser_bytes,
-            builtin_entity_parser=BuiltinEntityParser("en", None))
+            builtin_entity_parser=BuiltinEntityParser.build(language="en"))
         result = loaded_intent_parser.parse("make me two cups of coffee")
 
         # Then

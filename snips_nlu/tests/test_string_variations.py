@@ -61,7 +61,7 @@ class TestStringVariations(SnipsTest):
         # Given
         language = LANGUAGE_EN
         string = "1 time and 23 times and one thousand and sixty and 1.2"
-        parser = BuiltinEntityParser(language, None)
+        parser = BuiltinEntityParser.build(language=language)
         entities = parser.parse(string, scope=[SNIPS_NUMBER])
         entities = sorted(entities, key=lambda x: x[RES_MATCH_RANGE][START])
 
@@ -83,8 +83,8 @@ class TestStringVariations(SnipsTest):
         string = "a and b 2"
 
         # When
-        variations = get_string_variations(string, language,
-                                           BuiltinEntityParser("en", None))
+        variations = get_string_variations(
+            string, language, BuiltinEntityParser.build(language="en"))
 
         # Then
         expected_variations = {
@@ -115,8 +115,8 @@ class TestStringVariations(SnipsTest):
         string = "Küche"
 
         # When
-        variations = get_string_variations(string, language,
-                                           BuiltinEntityParser("en", None))
+        variations = get_string_variations(
+            string, language, BuiltinEntityParser.build(language="en"))
 
         # Then
         expected_variations = {
@@ -133,8 +133,8 @@ class TestStringVariations(SnipsTest):
         string = "france 24"
 
         # When
-        variations = get_string_variations(string, language,
-                                           BuiltinEntityParser("en", None))
+        variations = get_string_variations(
+            string, language, BuiltinEntityParser.build(language="en"))
 
         # Then
         expected_variations = {
@@ -153,8 +153,8 @@ class TestStringVariations(SnipsTest):
         string = "7.62 mm caliber 2 and six"
 
         # When
-        variations = numbers_variations(string, language,
-                                        BuiltinEntityParser("en", None))
+        variations = numbers_variations(
+            string, language, BuiltinEntityParser.build(language="en"))
 
         # Then
         expected_variations = {

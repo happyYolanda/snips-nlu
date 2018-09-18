@@ -181,7 +181,7 @@ class TestLogRegIntentClassifier(FixtureTest):
         # When
         loaded_classifier = LogRegIntentClassifier.from_path(
             self.tmp_file_path,
-            builtin_entity_parser=BuiltinEntityParser("en", None))
+            builtin_entity_parser=BuiltinEntityParser.build(language="en"))
         result = loaded_classifier.get_intent("Make me two cups of tea")
 
         # Then
@@ -197,7 +197,7 @@ class TestLogRegIntentClassifier(FixtureTest):
         intent_classifier_bytes = intent_classifier.to_byte_array()
         loaded_classifier = LogRegIntentClassifier.from_byte_array(
             intent_classifier_bytes,
-            builtin_entity_parser=BuiltinEntityParser("en", None))
+            builtin_entity_parser=BuiltinEntityParser.build(language="en"))
         result = loaded_classifier.get_intent("make me two cups of tea")
 
         # Then

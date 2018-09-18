@@ -257,8 +257,8 @@ class TestIntentClassifierFeaturizer(SnipsTest):
         utterances.append(labeled_utterance)
         labels = np.array([0, 0, 1, 1])
 
-        custom_entity_parser = CustomEntityParser(
-            CustomEntityParserUsage.WITH_AND_WITHOUT_STEMS).fit(dataset)
+        custom_entity_parser = CustomEntityParser.build(
+            dataset, CustomEntityParserUsage.WITH_AND_WITHOUT_STEMS)
 
         featurizer = Featurizer(
             language,

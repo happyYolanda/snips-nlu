@@ -8,12 +8,13 @@ from copy import deepcopy
 from future.utils import iteritems, itervalues
 from snips_nlu_ontology import get_all_languages
 
-from snips_nlu.entity_parser.builtin_entity_parser import (
-    get_builtin_entity_parser, is_builtin_entity, is_gazetteer_entity)
-from snips_nlu.constants import (
-    AUTOMATICALLY_EXTENSIBLE, CAPITALIZE, DATA, ENTITIES, ENTITY, INTENTS,
-    LANGUAGE, SLOT_NAME, SYNONYMS, TEXT, USE_SYNONYMS, UTTERANCES, VALIDATED,
-    VALUE, PARSER_THRESHOLD)
+from snips_nlu.constants import (AUTOMATICALLY_EXTENSIBLE, CAPITALIZE, DATA,
+                                 ENTITIES, ENTITY, INTENTS, LANGUAGE,
+                                 PARSER_THRESHOLD, SLOT_NAME, SYNONYMS, TEXT,
+                                 USE_SYNONYMS, UTTERANCES, VALIDATED, VALUE)
+from snips_nlu.entity_parser.builtin_entity_parser import (BuiltinEntityParser,
+                                                           is_builtin_entity,
+                                                           is_gazetteer_entity)
 from snips_nlu.preprocessing import tokenize_light
 from snips_nlu.string_variations import get_string_variations
 from snips_nlu.utils import validate_key, validate_keys, validate_type
@@ -64,7 +65,7 @@ def validate_and_format_dataset(dataset):
         validate_and_format_intent(intent, dataset[ENTITIES])
 
     utterance_entities_values = extract_utterance_entities(dataset)
-    builtin_entity_parser = get_builtin_entity_parser(dataset)
+    builtin_entity_parser = BuiltinEntityParser.build(dataset=dataset)
 
     for entity_name, entity in iteritems(dataset[ENTITIES]):
         uterrance_entities = utterance_entities_values[entity_name]

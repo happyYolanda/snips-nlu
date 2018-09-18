@@ -9,13 +9,13 @@ from pathlib import Path
 
 from future.utils import iteritems, itervalues
 
-from snips_nlu.constants import BUILTIN_ENTITY_PARSER, INTENTS, RES_INTENT_NAME
+from snips_nlu.constants import INTENTS, RES_INTENT_NAME
 from snips_nlu.dataset import validate_and_format_dataset
 from snips_nlu.intent_parser.intent_parser import IntentParser
 from snips_nlu.pipeline.configs import ProbabilisticIntentParserConfig
+from snips_nlu.pipeline.ml_unit import build_ml_unit
 from snips_nlu.pipeline.processing_unit import (
     load_processing_unit)
-from snips_nlu.pipeline.ml_unit import build_ml_unit
 from snips_nlu.result import empty_result, parsing_result
 from snips_nlu.utils import (check_persisted_path, elapsed_since,
                              fitted_required, json_string, log_elapsed_time,
@@ -176,8 +176,8 @@ class ProbabilisticIntentParser(IntentParser):
         with model_path.open(encoding="utf8") as f:
             model = json.load(f)
 
-        parser = cls(config=cls.config_type.from_dict(model["config"]))
-        parser._set_parsers_from_shared_resources(**shared)
+        parser = cls(config=cls.config_type.from_dict(model["config"]),
+                     **shared)
         classifier = None
         intent_classifier_path = path / "intent_classifier"
         if intent_classifier_path.exists():

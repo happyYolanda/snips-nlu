@@ -4,8 +4,7 @@ from future.utils import with_metaclass
 
 from snips_nlu.constants import (
     BUILTIN_ENTITY_PARSER, CUSTOM_ENTITY_PARSER, CUSTOM_ENTITY_PARSER_USAGE)
-from snips_nlu.entity_parser.builtin_entity_parser import (
-    get_builtin_entity_parser)
+from snips_nlu.entity_parser.builtin_entity_parser import BuiltinEntityParser
 from snips_nlu.entity_parser.custom_entity_parser import CustomEntityParser
 from snips_nlu.pipeline.configs import MLUnitConfig
 from snips_nlu.pipeline.processing_unit import SerializableUnit, _get_unit_type
@@ -47,7 +46,8 @@ class MLUnit(with_metaclass(ABCMeta, SerializableUnit)):
         # is none.
         # In the other case the parser is provided fitted by another unit
         if self.builtin_entity_parser is None or self.fitted:
-            self.builtin_entity_parser = get_builtin_entity_parser(dataset)
+            self.builtin_entity_parser = BuiltinEntityParser.build(
+                dataset=dataset)
         return self
 
     def fit_custom_entity_parser_if_needed(self, dataset):
@@ -63,13 +63,9 @@ class MLUnit(with_metaclass(ABCMeta, SerializableUnit)):
             return self
 
         if self.custom_entity_parser is None or self.fitted:
-            self.custom_entity_parser = CustomEntityParser(
-                parser_usage).fit(dataset)
+            self.custom_entity_parser = CustomEntityParser.build(
+                dataset, parser_usage)
         return self
-
-    def _set_parsers_from_shared_resources(self, **shared):
-        self.builtin_entity_parser = shared.get(BUILTIN_ENTITY_PARSER)
-        self.custom_entity_parser = shared.get(CUSTOM_ENTITY_PARSER)
 
 
 def get_ml_unit_config(unit_config):

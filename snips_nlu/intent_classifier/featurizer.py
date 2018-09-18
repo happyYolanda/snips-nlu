@@ -15,10 +15,10 @@ from snips_nlu.constants import (
     BUILTIN_ENTITY_PARSER, CUSTOM_ENTITY_PARSER, CUSTOM_ENTITY_PARSER_USAGE,
     DATA, ENTITY, ENTITY_KIND, NGRAM, TEXT)
 from snips_nlu.dataset import get_text_from_chunks
-from snips_nlu.languages import get_default_sep
-from snips_nlu.entity_parser.builtin_entity_parser import (
-    get_builtin_entity_parser, is_builtin_entity)
+from snips_nlu.entity_parser.builtin_entity_parser import (BuiltinEntityParser,
+                                                           is_builtin_entity)
 from snips_nlu.entity_parser.custom_entity_parser import CustomEntityParser
+from snips_nlu.languages import get_default_sep
 from snips_nlu.pipeline.configs import FeaturizerConfig
 from snips_nlu.preprocessing import stem, tokenize_light
 from snips_nlu.resources import (
@@ -122,7 +122,8 @@ class Featurizer(object):
         # is none.
         # In the other case the parser is provided fitted by another unit
         if self.builtin_entity_parser is None or self.fitted:
-            self.builtin_entity_parser = get_builtin_entity_parser(dataset)
+            self.builtin_entity_parser = BuiltinEntityParser.build(
+                dataset=dataset)
         return self
 
     def fit_custom_entity_parser_if_needed(self, dataset):
@@ -138,7 +139,8 @@ class Featurizer(object):
             return self
 
         if self.custom_entity_parser is None or self.fitted:
-            self.custom_entity_parser = CustomEntityParser(parser_usage).fit(dataset)
+            self.custom_entity_parser = CustomEntityParser.build(
+                dataset, parser_usage)
         return self
 
     def to_dict(self):

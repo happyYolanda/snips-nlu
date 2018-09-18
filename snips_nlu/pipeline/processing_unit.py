@@ -12,16 +12,15 @@ from snips_nlu.utils import classproperty, json_string, temp_dir, unzip_archive
 
 
 class ProcessingUnit(with_metaclass(ABCMeta, object)):
-    """Abstraction of a NLU pipeline unit
-    """
+    """Abstraction of a NLU pipeline unit"""
+
     @classproperty
     def unit_name(cls):  # pylint:disable=no-self-argument
         raise NotImplementedError
 
 
 class SerializableUnit(with_metaclass(ABCMeta, ProcessingUnit)):
-    """Abstraction of a NLU pipeline unit
-    """
+    """Abstraction of a NLU pipeline unit"""
 
     @abstractmethod
     def persist(self, path):

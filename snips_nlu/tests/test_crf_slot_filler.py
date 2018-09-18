@@ -782,7 +782,7 @@ class TestCRFSlotFiller(FixtureTest):
         slot_filler_config = CRFSlotFillerConfig(random_seed=42)
         slot_filler = CRFSlotFiller(
             config=slot_filler_config,
-            builtin_entity_parser=BuiltinEntityParser("en", None))
+            builtin_entity_parser=BuiltinEntityParser.build(language="en"))
         slot_filler.language = LANGUAGE_EN
         slot_filler.intent = "intent1"
         slot_filler.slot_name_mapping = {
